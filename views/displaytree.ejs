@@ -347,174 +347,8 @@ function  main_display() {
   updateLayout(cladeRoot,1);
 }
 
-// Definitions des fonctions
-// ------------------------
-
-// Fonction de test du support local.storage
-// https://michalzalecki.com/why-using-localStorage-directly-is-a-bad-idea/
-// ------------------------------------------
-function isStorageSupported(storage) {
-  try {
-    const key = "__some_random_key_you_are_not_going_to_use__";
-    storage.setItem(key, key);
-  console.log(key),
-  console.log(storage.getItem(key));
-    storage.removeItem(key);
-  console.log(storage.getItem(key));
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-// Fonction d'export du SVG
-// ------------------------
-function saveSVG(){
-  // get styles from all required stylesheets
-  // http://www.coffeegnome.net/converting-svg-to-png-with-canvg/
-  var style = "\n";
-  var requiredSheets = ['phylogram_d3.css', 'open_sans.css'];
-  var img = new Image();
-  var serializer = new XMLSerializer();
-  // prepend style to svg
-  svg.insert('defs',":first-child")
-  d3.select("svg defs")
-      .append('style')
-      .attr('type','text/css')
-      .html(style);
-  var svgStr = serializer.serializeToString(svg.node());
-  img.src = 'data:image/svg+xml;base64,'+window.btoa(unescape(encodeURIComponent(svgStr)));
-  window.open().document.write('<p>Please copy or save the the image <img src="' + img.src + '"/>');
-};
-
-// Fonction recursive qui renvoie les noeuds ancestraux communs a
-// une liste de feuilles
-// ---------------------------------------------------------------
-function recuAncestors (todo, done) {
-  if (todo.length > 1) {
-    var n1 = todo.shift();
-    var n2 = todo.shift();
-    var anc = n1.path(n2);
-    var maxHeight=0;
-    var n3=n1;
-    anc.forEach(function (d ){
-      if (d.height > maxHeight) {
-        maxHeight = d.height;
-        n3=d;
-      }
-    });
-    todo.splice(0, 0,n3);
-    done.push(n1);
-    done.push(n2);
-    anc = n1.path(n3);
-    anc.forEach(function (d ){
-      done.push(d)
-    });
-    anc = n2.path(n3);
-    anc.forEach(function (d ){
-      done.push(d)
-    });
-    return recuAncestors (todo, done)
-  }
-  else {
-    var n1  = todo.shift();
-    done.push(n1);
-    return (done, [])
-  }
-}
-
-//  Fonction de calcul du dernier ancetre commun (LCA)
-//  --------------------------------------------------
-function getLCASpecies(geneNode,speciesTree) {
-    // Recupere les feuilles chez l'arbre de  genes
-    var geneSpecies = [];
-    var tmp = getSpec(geneNode);
-    tmp.forEach(function(d){ geneSpecies.push(d.trim())});
-    // Recupere les feuilles chez l'arbre d'especes qui sont
-    //  dans l'arbre de genes
-    var speciesTreeSelection = [];
-    var speciesTreeLeaves =    speciesTree.descendants()
-      .filter(function (e) {return !e.children});
-    speciesTreeLeaves.forEach(function(d) {
-      if (geneSpecies.includes(d.data.name.trim())) {
-        speciesTreeSelection.push(d);
-      }
-    })
-    //  Recupere le LCA des especes dans l'arbre d'especes
-    var processed = [];
-    var toprocess = speciesTreeSelection;
-    recuAncestors(toprocess,processed);
-    var hauteurMax = 0;
-    var lca;
-    processed.forEach(function (d){
-      if (d) {
-        if (d.height >=  hauteurMax) {
-          hauteurMax = d.height;
-          lca = d;
-        }}
-      });
-    if (lca) {
-      console.log("LCA = "+lca.data.name);
-      return(lca.data.name);
-    } else {
-      console.log("ERROR UNABLE TO FIND LCA");
-      return("Unknow L.C.A");
-    }
-  }
-
-// Fonction d'affichage de la palette
-// -----------------------------------
-function affichePalette() {
-  // Gestion de localStorage
-  // var myStorage = window.localStorage;
-  if (myStorage.getItem("ColorationProcessed") === null) {  // pas de coloration
-    // Defintiion d'une palette
-    // var selectedSpecies = "ARCHAEA::BECC43;EUKARYOTA::CC6096;BACTERIA::829863;BACTEROIDETES/CHLOROBI GROUP::18CCBA;BETAPROTEOBACTERIA::7C84CC;GAMMAPROTEOBACTERIA::2199CC;DELTA/EPSILON SUBDIVISIONS::CC667A;ALPHAPROTEOBACTERIA::BC97CC;FIRMICUTES::CC4A23;TENERICUTES::5849A3;ACTINOBACTERIA::F72D70;";
-    var selectedSpecies = defaultPalette;
-    myStorage.setItem("selectedSpecies",selectedSpecies);
-    var allSpecies = [];
-    var allSpeciesNoInternals = [];
-    // Verification de la palette courante
-    var selectedSpecArray =  selectedSpecies.split(";");
-    var arrayLength = selectedSpecArray.length;
-    var speciesPalette = [];
-    var colorPalette = [];
-    for (var i = 0; i < arrayLength-1; i++) {
-      var specColor = selectedSpecArray[i].split("::");
-      speciesPalette.push(specColor[0]);
-      colorPalette.push(specColor[1]);
-    }
-    // Explore l'arbre d'espece pour fixer les couleurs des taxons
-    var treeRoot = d3.hierarchy(cladeRootSpecies, function(d) {
-      return d.clade;
-    });
-    treeRoot.eachBefore(function (d) {
-      if (d.data.name.indexOf("(INTERNAL)") === -1) {
-        allSpeciesNoInternals.push(d.data.name.trim());
-      }
-      allSpecies.push(d.data.name.trim());
-      if  (speciesPalette.includes(d.data.name.trim())) {
-        var index = speciesPalette.indexOf(d.data.name.trim());
-        myStorage.setItem(d.data.name.trim(),"#"+colorPalette[index]);
-        var nodes = d.descendants();
-        nodes.forEach(function(n) {
-          myStorage.setItem(n.data.name.trim(),"#"+colorPalette[index]);
-          myStorage.setItem("phylum_"+n.data.name.trim(),speciesPalette[index]);
-        });
-      }
-    });
-    myStorage.setItem("ColorationProcessed","ok");
-  }
-  var selectedSpecies=myStorage.getItem("selectedSpecies");
-  var selectedSpecArray =  selectedSpecies.split(";");
-  var arrayLength = selectedSpecArray.length;
-  $(testnav).append('<b>PALETTE:</b>');
-  for (var i = 0; i < arrayLength-1; i++) {
-    var specColor = selectedSpecArray[i].split("::");
-    $(testnav).append('<div  style="color:#'+specColor[1]+'">'+specColor[0]+'</div>');
-  }
-  $(testnav).append('<a href=taxodico target=_blank>Edit</a>');
-}
+// Definitions des autres fonctions
+// --------------------------------
 
 // Fonction de mise a jour de l'affichage
 // ---------------------------------------
@@ -551,604 +385,6 @@ function updateLayout(cRoot,firstLoad=0) {
   }
   updateSvg(treeRoot,firstLoad);
 }
-
-// Fonction de coloration des feuilles
-// -----------------------------------
-function  setLeafColour (taxon){
-  return myStorage.getItem(taxon.trim());
-};
-
-// Fonction de coloration du resultat d'une recherche de  pattern
-// La variable pattern est ici un tableau du nom des feuilles qui ont matchés
-// --------------------------------------------------------------------------
-function subnode(nodes,pattern,colPattern) {
-  var ancs;
-  var n1;
-  var n2;
-  var n3;
-  var selection = [];
-  var racine = null;
-  // Selection des feuilles
-  var scrollref = 0;
-  nodes.forEach(function (d,i ){
-    if (d.depth == 0) {
-      racine = d;
-    }
-    if (d.data.lastEvent.crossref) {
-      // Si la balise crossref est presente on
-      // l'utilise plutot que le nom du gene
-      var cross=d.data.lastEvent.crossref;
-      for(var exKey in cross) {
-        var nomFeuille = cross[exKey];
-        pattern.forEach(function (p){
-          var nomPattern = p.replace(/[\n\r]/g, '');
-          if (nomFeuille === nomPattern) {
-            selection.push(d);
-            scrollref=d.y;
-          }
-        })
-      }
-    }
-    if (d.data.name){
-      var nomFeuille = d.data.name;
-      pattern.forEach(function (p){
-        var nomPattern = p.replace(/[\n\r]/g, '');
-        if (nomFeuille === nomPattern) {
-          selection.push(d);
-          scrollref=d.y;
-          if (!d.data.lastEvent["pattern"]) {
-            d.data.lastEvent["pattern"] = [];
-            }
-            d.data.lastEvent["pattern"].push(colPattern); // un noeud peut etre associe a plusieur palettes
-        }
-      })
-    }
-    var tmp =   removeDuplicates(selection);
-    selection = tmp;
-  });
-  var processed = [];
-  if (selection.length == 1) {
-    selection.push(racine);
-  }
-  var toprocess = selection;
-  recuAncestors(toprocess,processed);
-  var ancestors = processed;
-  nodes.forEach(function (d ){
-    if (ancestors.includes(d)) {
-      if (!d.data.lastEvent["pattern"]) {
-        d.data.lastEvent["pattern"] = [];
-      }
-      d.data.lastEvent["pattern"].push(colPattern); // un noeud peut etre associe a plusieur palettes
-    }
-  });
-  return scrollref;
-}
-
-// Fonction de calcul de la position  d'un noeud a partir des longueurs
-// de branch_length
-// --------------------------------------------------------------------
-function phylo(n) {
-  var dist = 0.0;
-  if (n && n.data.branch_length != null) {
-    var p = n.parent;
-    dist = parseFloat(n.data.branch_length) + phylo(p);
-    return dist;
-  }
-  return dist;
-}
-
-// Fonction pour utiliser les lobgueurs de branchede lors de l'affichage
-// d'un arbre
-// ----------------------------------------------------------------------
-function phylogeny(treeRoot,offset) {
-  treeRoot.each(function (d) {
-    var phylodist = phylo(d);
-    d.x = phylodist*offset;
-  });
-}
-
-// Fonction qui decale la position x d'un "loss"
-// ---------------------------------------------
-function phylogeny_setloss(treeRoot,offset) {
-  treeRoot.each(function (d) {
-    if (d.data.lastEvent.eventType === "loss") {
-     var lospar = d.parent;
-     d.x = (d.x+lospar.x)/2
-    }
-  });
-}
-
-// Fonction pour savoir si un noeud est monophyletique en terme de coleur
-// ----------------------------------------------------------------------
-function monophyletic(noeud) {
-  var monoNodes = noeud.descendants();
-  var monoLeaves = monoNodes.filter(function (e) {
-    return !e.children;
-  });
-  d=monoLeaves[0];
-  var eventsRec = d.data.eventsRec;
-  if (eventsRec){
-    var lastEvent = eventsRec[eventsRec.length - 1];
-  }
-  var monoColour = setLeafColour(lastEvent.speciesLocation);
-  var isMono = [lastEvent.speciesLocation,monoLeaves.length];
-  var speciesLeaves = [];
-  var anc = monoLeaves[0];
-  monoLeaves.forEach(function (d) {
-    eventsRec = d.data.eventsRec;
-    if (eventsRec){
-      var lastEvent = eventsRec[eventsRec.length - 1];
-    }
-    speciesLeaves.push(lastEvent.speciesLocation);
-    if (setLeafColour(lastEvent.speciesLocation) !=  monoColour) {
-      var newanc = anc.path(d);
-      anc = newanc[0];
-      isMono = [0,0];
-    }
-  });
-  var unicSpecies = removeDuplicates(speciesLeaves);
-  isMono.push(unicSpecies.length);
-  return(isMono)
-}
-
-// Fonction qui collaopse les noeuds monophyletiques situes entre une certaine
-// hauteur de la racine et une  certaine hauteur des noeuds deja collapses
-// ------------------------------------------------------------------------
-function collapseMonophyletic(treeRoot,patterns) {
-  var acolapser = [];
-  var aouvrir = [];
-  var prevnode = null;
-  if (patterns.length > 0 ) {
-    // Boucle sur les patterns
-    patterns.forEach(function(p){
-      // Selection des feuilles
-      p.forEach(function (d,i ){
-        var nomPattern= d.replace(/[\n\r]/g, '');
-        var focusNode = null;
-        // Recupere la feuille focus
-        treeRoot.each(function (d,i ){
-          if (d.data.name){
-            var nomFeuille = d.data.name;
-            if (nomFeuille === nomPattern) {
-              focusNode = d;
-            }
-          }
-          // cas des crossref
-          if (d.data.eventsRec) {
-            if (d.data.eventsRec[0].crossref) {
-              // Si la balise crossref est presente on
-              // l'utilise plutot que le nom du gene
-              var cross=d.data.eventsRec[0].crossref;
-              for(var exKey in cross) {
-                var nomFeuille = cross[exKey];
-                if (nomFeuille === nomPattern){
-                  console.log("FIND PATTERN "+nomFeuille);
-                  focusNode = d;
-                }
-              }
-            }
-          }
-        });
-        if (focusNode) {
-          //Ouvre les freres de la feuille
-          parent = focusNode.parent;
-          parent.each(function (d) {
-            // aouvrir.push(d)
-          });
-          //ouvre les noeuds entre la feuille et la racine
-          while (parent != null) {
-            aouvrir.push(parent)
-            parent = parent.parent;
-          }
-        }
-        else {
-          console.log("PATTERN NOT FOUND: "+ nomPattern);
-        }
-      });
-    });
-  }
-  else {
-    console.log("NO PATTERN SEARCH");
-  }
-  treeRoot.eachBefore(function (d) {
-    var parent = d.parent;
-    var gparent = parent;
-    if (gparent !== null) {
-      gparent = parent.parent;
-    }
-    var agparent = gparent;
-    if (agparent !== null) {
-      agparent = gparent.parent;
-    }
-    var aagparent = agparent;
-    if (aagparent !== null) {
-      aagparent = agparent.parent;
-    }
-    var aaagparent = aagparent;
-    if (aaagparent !== null) {
-      aaagparent = aagparent.parent;
-    }
-    if (!(( aouvrir.includes(d)) ||( acolapser.includes(parent)) ||  (acolapser.includes(gparent))||  (acolapser.includes(agparent))||  (acolapser.includes(aagparent)) )){
-      var monoTest = monophyletic(d);
-      if (monoTest[0] != 0) {
-        acolapser.push(d);
-        if (d.depth > 0) {
-          var phylum = setLeafColour("phylum_"+monoTest[0]);
-          var phylum = getLCASpecies(d,speciesTreeRoot);
-          if (!phylum) {
-            phylum = "Undefined"
-          }
-          if   (d.data.clade) {
-            // d.data.name = "["+monoTest[1]+" seq "+monoTest[2]+" spe] ";
-            // d.data.lastEvent = {eventType : "collapsed", speciesLocation :phylum};
-            // Un peu bizzare de donner monophyletic comme eventype
-            // On est oblige de faire ca car on ecrase les noeuds avant de faire le updatelyaout qui va justement
-            // ajourter les   d.data.lastEvent
-            if (! d.data.lastEvent) { // je  ne veux pas ecraser l'info si elle existe deja
-              d.data.lastEvent = {eventType : "monophyletic",speciesLocation :phylum};
-            }
-            // d.data.lastEvent.speciesLocation = phylum;
-            d.data.nodeinfo = {status : "collapsed"};
-            d.data._clade = d.data.clade;
-            d.data.clade = null;
-          }
-        }
-      }
-    }
-  });
-}
-
-// Fonction qui collaopse les noeuds monophyletiques situes entre une certaine
-// hauteur de la racine et une  certaine hauteur des noeuds deja collapses
-// pour les gros arbres
-// ------------------------------------------------------------------------
-function collapseMonophyleticBigTree(treeRoot,patterns) {
-  var acolapser = [];
-  var aouvrir = [];
-  var prevnode = null;
-  if (patterns.length > 0 ) {
-    // Boucle sur les patterns
-    patterns.forEach(function(p){
-      // Selection des feuilles
-      p.forEach(function (d,i ){
-        var nomPattern= d.replace(/[\n\r]/g, '');
-        var focusNode = null;
-        // Recupere la feuille focus
-        treeRoot.each(function (d,i ){
-          if (d.data.name){
-            var nomFeuille = d.data.name;
-            if (nomFeuille === nomPattern) {
-              focusNode = d;
-            }
-          }
-          // cas des crossref
-          if (d.data.eventsRec) {
-            if (d.data.eventsRec[0].crossref) {
-              // Si la balise crossref est presente on
-              // l'utilise plutot que le nom du gene
-              var cross=d.data.eventsRec[0].crossref;
-              for(var exKey in cross) {
-                var nomFeuille = cross[exKey];
-                if (nomFeuille === nomPattern){
-                  console.log("FIND PATTERN "+nomFeuille);
-                  focusNode = d;
-                }
-              }
-            }
-          }
-        });
-        if (focusNode) {
-          //Ouvre les freres de la feuille
-          parent = focusNode.parent;
-          parent.each(function (d) {
-            // aouvrir.push(d)
-          });
-          //ouvre les noeuds entre la feuille et la racine
-          while (parent != null) {
-            aouvrir.push(parent)
-            parent = parent.parent;
-          }
-        }
-        else {
-          console.log("PATTERN NOT FOUND: "+ nomPattern);
-        }
-      });
-    });
-  }
-  else {
-    console.log("NO PATTERN SEARCH");
-  }
-  treeRoot.eachBefore(function (d) {
-    var parent = d.parent;
-    var gparent = parent;
-    if (gparent !== null) {
-      gparent = parent.parent;
-    }
-    var agparent = gparent;
-    if (agparent !== null) {
-      agparent = gparent.parent;
-    }
-    var aagparent = agparent;
-    if (aagparent !== null) {
-      aagparent = agparent.parent;
-    }
-    var aaagparent = aagparent;
-    if (aaagparent !== null) {
-      aaagparent = aagparent.parent;
-    }
-    if (!(( aouvrir.includes(d)) ||( acolapser.includes(parent)) ||  (acolapser.includes(gparent))||  (acolapser.includes(agparent))||  (acolapser.includes(aagparent)) )){
-      // if (d.depth % 3 == 0 ){
-      // var monoTest = monophyletic(d);
-      var monoTest =[1,1];
-      // if (d.depth < 5 ) {
-      //   monoTest = monophyletic(d);
-      // }
-      // if (monoTest[0] != 0) {
-      acolapser.push(d);
-      if (d.depth > 0) {
-        var phylum;
-        if (d.depth < 10 ) {
-          monoTest = monophyletic(d);
-          phylum = setLeafColour("phylum_"+monoTest[0]);
-        }
-        if (!phylum) {
-          phylum = "Undetermined taxon"
-        }
-        if   (d.data.clade) {
-          // d.data.name = "["+monoTest[1]+" seq "+monoTest[2]+" spe] ";
-          // d.data.lastEvent = {eventType : "collapsed", speciesLocation :phylum};
-          // Un peu bizzare de donner monophyletic comme eventype
-          // On est oblige de faire ca car on ecrase les noeuds avant de faire le updatelyaout qui va justement
-          // ajourter les   d.data.lastEvent
-          if (phylum  != "Undetermined taxon") {
-            if (! d.data.lastEvent) { // je  ne veux pas ecraser l'info si elle existe deja
-            d.data.lastEvent = {eventType : "monophyletic",speciesLocation :phylum};
-            }
-          }
-          else {
-            if (! d.data.lastEvent) { // je  ne veux pas ecraser l'info si elle existe deja
-              d.data.lastEvent = {eventType : "speciation",speciesLocation :phylum};
-            }
-          }
-          d.data.lastEvent.speciesLocation = phylum;
-          d.data.nodeinfo = {status : "collapsed"};
-          d.data._clade = d.data.clade;
-          d.data.clade = null;
-        }
-      }
-    }
-  });
-}
-
-// Fonction ajoute nb sequences et especes
-// ---------------------------------------
-function  addNumberSeqSpec(treeRoot) {
-  treeRoot.eachAfter(function (d) {
-    var specs = [];
-    if (!d.children) {
-      d.data.nbseqspe =  {nbSeq : 1,nbSpe : 1};
-    }
-    else {
-      var nbseq = 0;
-      var nbspe = 0;
-      var fils = d.children;
-      fils.forEach(function (d){
-        nbseq = nbseq + d.data.nbseqspe.nbSeq;
-        // nbspe = nbspe + d.data.nbseqspe.nbSpe;
-        var spec = getSpec(d);
-        specs = specs.concat(spec);
-      })
-      var tmp = specs;
-      uspecs=removeDuplicates(tmp);
-      nbspe=uspecs.length;
-      d.data.nbseqspe =  {nbSeq :nbseq,nbSpe :nbspe};
-    }
-  });
-}
-
-// Fonction recupere especes
-// -------------------------
-function getSpec (noeud) {
-  if (!noeud.children) {
-    var specs = [];
-    var eventsRec = noeud.data.eventsRec;
-    if (eventsRec) {
-      var lastEvent = eventsRec[eventsRec.length - 1];
-      specs.push(lastEvent.speciesLocation)
-    }
-    else {
-      console.log(" ERROR : NO EVENTS FOR ");
-      console.log(noeud.data);
-    }
-    return specs;
-  }
-  else {
-    var specs = [];
-    var fils = noeud.children;
-      fils.forEach(function (d, i ){
-        var spec = getSpec(d);
-        var tmp = specs.concat(spec);
-        specs = tmp;
-      });
-    return specs;
-  }
-}
-
-// Fonction qui collapse les noeuds d'une certaine profondeur
-// ----------------------------------------------------------
-function expandTree(treeRoot) {
-  treeRoot.each(function (d) {
-    if (d.data.nodeinfo) {
-      if (d.data.nodeinfo.status === "collapsed") {
-        if (d.data._clade) {
-          d.data.clade = d.data._clade;
-          d.data._clade = null;
-          d.data.nodeinfo = {status : "extended"};
-        }
-      }
-    }
-  });
-}
-
-// Fonction qui collapse les noeuds d'une certaine profondeur
-// ----------------------------------------------------------
-function collapseVeryBigTree(treeRoot,patterns) {
-  var acolapser = [];
-  var aouvrir = [];
-  if (patterns.length > 0)  {
-    //Ecrase tous les noeuds
-    treeRoot.each(function (d) {
-      if ((d.depth == 5) || (d.depth == 10) ||(d.depth == 20)|| (d.depth == 30)|| (d.depth == 40) ) {
-      acolapser.push(d)
-      }
-    });
-    // Boucle sur les patterns
-    patterns.forEach(function(p) {
-      // Selection des feuilles de la pattern
-      p.forEach(function(d,i) {
-        var nomPattern= d.replace(/[\n\r]/g, '');
-        var focusNode = null;
-        // Recupere la feuille focus
-        treeRoot.each(function (d,i ){
-          if (d.data.name){
-            var nomFeuille = d.data.name;
-            if (nomFeuille === nomPattern) {
-              focusNode = d;
-            }
-          }
-          // cas des crossref
-          if (d.data.eventsRec) {
-            if (d.data.eventsRec[0].crossref) {
-              // Si la balise crossref est presente on
-              // l'utilise plutot que le nom du gene
-              var cross=d.data.eventsRec[0].crossref;
-              for(var exKey in cross) {
-                var nomFeuille = cross[exKey];
-                if (nomFeuille === nomPattern){
-                  console.log("FIND PATTERN "+nomFeuille);
-                  focusNode = d;
-                }
-              }
-            }
-          }
-        });
-        if (focusNode) {
-          var parent = focusNode.parent;
-          //Ouvre les freres de la feuille
-          parent.each(function (d) {
-            // aouvrir.push(d)
-          });
-          //ouvre les noeuds entre la feuille et la racine
-          while (parent != null) {
-            aouvrir.push(parent)
-            parent = parent.parent;
-          }
-        }
-        else {
-          console.log("PATTERN NOT FOUND : "+nomPattern);
-        }
-      });
-    });
-  }
-  else {
-    console.log("NO PATTERN")
-    treeRoot.each(function (d) {
-      if ((d.depth == 5) || (d.depth == 10) ||(d.depth == 30)|| (d.depth == 60)|| (d.depth == 90) ) {
-        acolapser.push(d)
-      }
-    });
-  }
-  acolapser.forEach(function (d) {
-    if   (d.data.clade) {
-      d.data._clade = d.data.clade;
-      d.data.clade = null;
-      d.data.nodeinfo = {status : "collapsed"};
-    }
-  });
-  aouvrir.forEach(function (d) {
-    if   (d.data._clade) {
-      d.data.clade = d.data._clade;
-      d.data._clade = null;
-      d.data.nodeinfo = {status : "extended"};
-    }
-  });
-}
-
-  // Fonction  suppression d'un element unique dans un tableau
-  // ----------------------------------------------------------
-  function removeSingle(target_array) {
-    target_array.sort();
-    var i = 0;
-    while(i < target_array.length) {
-      if(target_array[i] !== target_array[i+1]) {
-        target_array.splice(i,1);
-      }
-      else {
-        i += 1;
-      }
-    }
-    return target_array;
-  }
-
-  // Fonction  suppression des  elements multiples dans un tableau
-  // --------------------------------------------------------------
-  function removeDuplicates(target_array) {
-    target_array.sort();
-    var i = 0;
-    while(i < target_array.length) {
-      if(target_array[i] === target_array[i+1]) {
-        target_array.splice(i+1,1);
-      }
-      else {
-        i += 1;
-      }
-    }
-    return target_array;
-  }
-
-  // Fonction  suppression des  elements multiples dans un tableau et classe par occurence
-  // -------------------------------------------------------------------------------------
-  function removesortDuplicates(target_array) {
-    target_array.sort();
-    var sorted_array = [];
-    var i = 0;
-    var j = 0;
-    var vscore  = {score: 0, fam: "none"};
-    var scored_array = [];
-    var score = [];
-    score[j] = 0;
-    sorted_array[i] = target_array[i];
-    i=1;
-    while(i < target_array.length) {
-      if(target_array[i] !==  sorted_array[j]) {
-        j = j + 1;
-        sorted_array[j] = target_array[i];
-        score[j] = 0;
-      } else {
-         score[j] = score[j] + 1;
-      }
-       i = i + 1;
-    }
-    i = 0;
-    while(i <= j){
-      vscore  = {score: score[i], fam: sorted_array[i]};
-      scored_array.push(vscore);
-      i = i + 1
-    }
-    console.log(scored_array);
-    scored_array.sort(function(a,b){
-          scA=a.score;
-          scB=b.score;
-          console.log("CLASSEMENT ["+scA+"] ["+scB+"]=");
-          return scB - scA;
-        });
-    i = 0;
-    while(i <= j){
-      sorted_array[i] = scored_array[i].fam;
-      i = i + 1
-    }
-    return sorted_array;
-  }
 
 // Fonction principale : mise a jour du svg
 // ----------------------------------------
@@ -1868,10 +1104,778 @@ function updateSvg(treeRoot,firstLoad  ,config = {}) {
   if (firstLoad === 1 ) {
     $( "div.demo" )
     .animate({scrollTop: -minY + scrollref},(2000 + Math.abs(-minY +scrollref)/500),function() {});
+  }
+}
+// Fin de la fonction updateSvg
+// ----------------------------
+
+// Autres fonctions utilitaires
+// ----------------------------
+
+// Fonction de test du support local.storage
+// ------------------------------------------
+// https://michalzalecki.com/why-using-localStorage-directly-is-a-bad-idea/
+function isStorageSupported(storage) {
+  try {
+    const key = "__some_random_key_you_are_not_going_to_use__";
+    storage.setItem(key, key);
+  console.log(key),
+  console.log(storage.getItem(key));
+    storage.removeItem(key);
+  console.log(storage.getItem(key));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Fonction d'export du SVG
+// ------------------------
+function saveSVG(){
+  // get styles from all required stylesheets
+  // http://www.coffeegnome.net/converting-svg-to-png-with-canvg/
+  var style = "\n";
+  var requiredSheets = ['phylogram_d3.css', 'open_sans.css'];
+  var img = new Image();
+  var serializer = new XMLSerializer();
+  // prepend style to svg
+  svg.insert('defs',":first-child")
+  d3.select("svg defs")
+      .append('style')
+      .attr('type','text/css')
+      .html(style);
+  var svgStr = serializer.serializeToString(svg.node());
+  img.src = 'data:image/svg+xml;base64,'+window.btoa(unescape(encodeURIComponent(svgStr)));
+  window.open().document.write('<p>Please copy or save the the image <img src="' + img.src + '"/>');
+};
+
+// Fonction recursive qui renvoie les noeuds ancestraux communs a
+// une liste de feuilles
+// ---------------------------------------------------------------
+function recuAncestors (todo, done) {
+  if (todo.length > 1) {
+    var n1 = todo.shift();
+    var n2 = todo.shift();
+    var anc = n1.path(n2);
+    var maxHeight=0;
+    var n3=n1;
+    anc.forEach(function (d ){
+      if (d.height > maxHeight) {
+        maxHeight = d.height;
+        n3=d;
+      }
+    });
+    todo.splice(0, 0,n3);
+    done.push(n1);
+    done.push(n2);
+    anc = n1.path(n3);
+    anc.forEach(function (d ){
+      done.push(d)
+    });
+    anc = n2.path(n3);
+    anc.forEach(function (d ){
+      done.push(d)
+    });
+    return recuAncestors (todo, done)
+  }
+  else {
+    var n1  = todo.shift();
+    done.push(n1);
+    return (done, [])
+  }
+}
+
+//  Fonction de calcul du dernier ancetre commun (LCA)
+//  --------------------------------------------------
+function getLCASpecies(geneNode,speciesTree) {
+    // Recupere les feuilles chez l'arbre de  genes
+    var geneSpecies = [];
+    var tmp = getSpec(geneNode);
+    tmp.forEach(function(d){ geneSpecies.push(d.trim())});
+    // Recupere les feuilles chez l'arbre d'especes qui sont
+    //  dans l'arbre de genes
+    var speciesTreeSelection = [];
+    var speciesTreeLeaves =    speciesTree.descendants()
+      .filter(function (e) {return !e.children});
+    speciesTreeLeaves.forEach(function(d) {
+      if (geneSpecies.includes(d.data.name.trim())) {
+        speciesTreeSelection.push(d);
+      }
+    })
+    //  Recupere le LCA des especes dans l'arbre d'especes
+    var processed = [];
+    var toprocess = speciesTreeSelection;
+    recuAncestors(toprocess,processed);
+    var hauteurMax = 0;
+    var lca;
+    processed.forEach(function (d){
+      if (d) {
+        if (d.height >=  hauteurMax) {
+          hauteurMax = d.height;
+          lca = d;
+        }}
+      });
+    if (lca) {
+      console.log("LCA = "+lca.data.name);
+      return(lca.data.name);
+    } else {
+      console.log("ERROR UNABLE TO FIND LCA");
+      return("Unknow L.C.A");
     }
   }
-  // Fin de la fonction updateSvg
-  // =============================
+
+// Fonction d'affichage de la palette
+// -----------------------------------
+function affichePalette() {
+  // Gestion de localStorage
+  // var myStorage = window.localStorage;
+  if (myStorage.getItem("ColorationProcessed") === null) {  // pas de coloration
+    // Defintiion d'une palette
+    // var selectedSpecies = "ARCHAEA::BECC43;EUKARYOTA::CC6096;BACTERIA::829863;BACTEROIDETES/CHLOROBI GROUP::18CCBA;BETAPROTEOBACTERIA::7C84CC;GAMMAPROTEOBACTERIA::2199CC;DELTA/EPSILON SUBDIVISIONS::CC667A;ALPHAPROTEOBACTERIA::BC97CC;FIRMICUTES::CC4A23;TENERICUTES::5849A3;ACTINOBACTERIA::F72D70;";
+    var selectedSpecies = defaultPalette;
+    myStorage.setItem("selectedSpecies",selectedSpecies);
+    var allSpecies = [];
+    var allSpeciesNoInternals = [];
+    // Verification de la palette courante
+    var selectedSpecArray =  selectedSpecies.split(";");
+    var arrayLength = selectedSpecArray.length;
+    var speciesPalette = [];
+    var colorPalette = [];
+    for (var i = 0; i < arrayLength-1; i++) {
+      var specColor = selectedSpecArray[i].split("::");
+      speciesPalette.push(specColor[0]);
+      colorPalette.push(specColor[1]);
+    }
+    // Explore l'arbre d'espece pour fixer les couleurs des taxons
+    var treeRoot = d3.hierarchy(cladeRootSpecies, function(d) {
+      return d.clade;
+    });
+    treeRoot.eachBefore(function (d) {
+      if (d.data.name.indexOf("(INTERNAL)") === -1) {
+        allSpeciesNoInternals.push(d.data.name.trim());
+      }
+      allSpecies.push(d.data.name.trim());
+      if  (speciesPalette.includes(d.data.name.trim())) {
+        var index = speciesPalette.indexOf(d.data.name.trim());
+        myStorage.setItem(d.data.name.trim(),"#"+colorPalette[index]);
+        var nodes = d.descendants();
+        nodes.forEach(function(n) {
+          myStorage.setItem(n.data.name.trim(),"#"+colorPalette[index]);
+          myStorage.setItem("phylum_"+n.data.name.trim(),speciesPalette[index]);
+        });
+      }
+    });
+    myStorage.setItem("ColorationProcessed","ok");
+  }
+  var selectedSpecies=myStorage.getItem("selectedSpecies");
+  var selectedSpecArray =  selectedSpecies.split(";");
+  var arrayLength = selectedSpecArray.length;
+  $(testnav).append('<b>PALETTE:</b>');
+  for (var i = 0; i < arrayLength-1; i++) {
+    var specColor = selectedSpecArray[i].split("::");
+    $(testnav).append('<div  style="color:#'+specColor[1]+'">'+specColor[0]+'</div>');
+  }
+  $(testnav).append('<a href=taxodico target=_blank>Edit</a>');
+}
+
+// Fonction de coloration des feuilles
+// -----------------------------------
+function  setLeafColour (taxon){
+  return myStorage.getItem(taxon.trim());
+};
+
+// Fonction de coloration du resultat d'une recherche de  pattern
+// La variable pattern est ici un tableau du nom des feuilles qui ont matchés
+// --------------------------------------------------------------------------
+function subnode(nodes,pattern,colPattern) {
+  var ancs;
+  var n1;
+  var n2;
+  var n3;
+  var selection = [];
+  var racine = null;
+  // Selection des feuilles
+  var scrollref = 0;
+  nodes.forEach(function (d,i ){
+    if (d.depth == 0) {
+      racine = d;
+    }
+    if (d.data.lastEvent.crossref) {
+      // Si la balise crossref est presente on
+      // l'utilise plutot que le nom du gene
+      var cross=d.data.lastEvent.crossref;
+      for(var exKey in cross) {
+        var nomFeuille = cross[exKey];
+        pattern.forEach(function (p){
+          var nomPattern = p.replace(/[\n\r]/g, '');
+          if (nomFeuille === nomPattern) {
+            selection.push(d);
+            scrollref=d.y;
+          }
+        })
+      }
+    }
+    if (d.data.name){
+      var nomFeuille = d.data.name;
+      pattern.forEach(function (p){
+        var nomPattern = p.replace(/[\n\r]/g, '');
+        if (nomFeuille === nomPattern) {
+          selection.push(d);
+          scrollref=d.y;
+          if (!d.data.lastEvent["pattern"]) {
+            d.data.lastEvent["pattern"] = [];
+            }
+            d.data.lastEvent["pattern"].push(colPattern); // un noeud peut etre associe a plusieur palettes
+        }
+      })
+    }
+    var tmp =   removeDuplicates(selection);
+    selection = tmp;
+  });
+  var processed = [];
+  if (selection.length == 1) {
+    selection.push(racine);
+  }
+  var toprocess = selection;
+  recuAncestors(toprocess,processed);
+  var ancestors = processed;
+  nodes.forEach(function (d ){
+    if (ancestors.includes(d)) {
+      if (!d.data.lastEvent["pattern"]) {
+        d.data.lastEvent["pattern"] = [];
+      }
+      d.data.lastEvent["pattern"].push(colPattern); // un noeud peut etre associe a plusieur palettes
+    }
+  });
+  return scrollref;
+}
+
+// Fonction de calcul de la position  d'un noeud a partir des longueurs
+// de branch_length
+// --------------------------------------------------------------------
+function phylo(n) {
+  var dist = 0.0;
+  if (n && n.data.branch_length != null) {
+    var p = n.parent;
+    dist = parseFloat(n.data.branch_length) + phylo(p);
+    return dist;
+  }
+  return dist;
+}
+
+// Fonction pour utiliser les lobgueurs de branchede lors de l'affichage
+// d'un arbre
+// ----------------------------------------------------------------------
+function phylogeny(treeRoot,offset) {
+  treeRoot.each(function (d) {
+    var phylodist = phylo(d);
+    d.x = phylodist*offset;
+  });
+}
+
+// Fonction qui decale la position x d'un "loss"
+// ---------------------------------------------
+function phylogeny_setloss(treeRoot,offset) {
+  treeRoot.each(function (d) {
+    if (d.data.lastEvent.eventType === "loss") {
+     var lospar = d.parent;
+     d.x = (d.x+lospar.x)/2
+    }
+  });
+}
+
+// Fonction pour savoir si un noeud est monophyletique en terme de coleur
+// ----------------------------------------------------------------------
+function monophyletic(noeud) {
+  var monoNodes = noeud.descendants();
+  var monoLeaves = monoNodes.filter(function (e) {
+    return !e.children;
+  });
+  d=monoLeaves[0];
+  var eventsRec = d.data.eventsRec;
+  if (eventsRec){
+    var lastEvent = eventsRec[eventsRec.length - 1];
+  }
+  var monoColour = setLeafColour(lastEvent.speciesLocation);
+  var isMono = [lastEvent.speciesLocation,monoLeaves.length];
+  var speciesLeaves = [];
+  var anc = monoLeaves[0];
+  monoLeaves.forEach(function (d) {
+    eventsRec = d.data.eventsRec;
+    if (eventsRec){
+      var lastEvent = eventsRec[eventsRec.length - 1];
+    }
+    speciesLeaves.push(lastEvent.speciesLocation);
+    if (setLeafColour(lastEvent.speciesLocation) !=  monoColour) {
+      var newanc = anc.path(d);
+      anc = newanc[0];
+      isMono = [0,0];
+    }
+  });
+  var unicSpecies = removeDuplicates(speciesLeaves);
+  isMono.push(unicSpecies.length);
+  return(isMono)
+}
+
+// Fonction qui collaopse les noeuds monophyletiques situes entre une certaine
+// hauteur de la racine et une  certaine hauteur des noeuds deja collapses
+// ------------------------------------------------------------------------
+function collapseMonophyletic(treeRoot,patterns) {
+  var acolapser = [];
+  var aouvrir = [];
+  var prevnode = null;
+  if (patterns.length > 0 ) {
+    // Boucle sur les patterns
+    patterns.forEach(function(p){
+      // Selection des feuilles
+      p.forEach(function (d,i ){
+        var nomPattern= d.replace(/[\n\r]/g, '');
+        var focusNode = null;
+        // Recupere la feuille focus
+        treeRoot.each(function (d,i ){
+          if (d.data.name){
+            var nomFeuille = d.data.name;
+            if (nomFeuille === nomPattern) {
+              focusNode = d;
+            }
+          }
+          // cas des crossref
+          if (d.data.eventsRec) {
+            if (d.data.eventsRec[0].crossref) {
+              // Si la balise crossref est presente on
+              // l'utilise plutot que le nom du gene
+              var cross=d.data.eventsRec[0].crossref;
+              for(var exKey in cross) {
+                var nomFeuille = cross[exKey];
+                if (nomFeuille === nomPattern){
+                  console.log("FIND PATTERN "+nomFeuille);
+                  focusNode = d;
+                }
+              }
+            }
+          }
+        });
+        if (focusNode) {
+          //Ouvre les freres de la feuille
+          parent = focusNode.parent;
+          parent.each(function (d) {
+            // aouvrir.push(d)
+          });
+          //ouvre les noeuds entre la feuille et la racine
+          while (parent != null) {
+            aouvrir.push(parent)
+            parent = parent.parent;
+          }
+        }
+        else {
+          console.log("PATTERN NOT FOUND: "+ nomPattern);
+        }
+      });
+    });
+  }
+  else {
+    console.log("NO PATTERN SEARCH");
+  }
+  treeRoot.eachBefore(function (d) {
+    var parent = d.parent;
+    var gparent = parent;
+    if (gparent !== null) {
+      gparent = parent.parent;
+    }
+    var agparent = gparent;
+    if (agparent !== null) {
+      agparent = gparent.parent;
+    }
+    var aagparent = agparent;
+    if (aagparent !== null) {
+      aagparent = agparent.parent;
+    }
+    var aaagparent = aagparent;
+    if (aaagparent !== null) {
+      aaagparent = aagparent.parent;
+    }
+    if (!(( aouvrir.includes(d)) ||( acolapser.includes(parent)) ||  (acolapser.includes(gparent))||  (acolapser.includes(agparent))||  (acolapser.includes(aagparent)) )){
+      var monoTest = monophyletic(d);
+      if (monoTest[0] != 0) {
+        acolapser.push(d);
+        if (d.depth > 0) {
+          var phylum = setLeafColour("phylum_"+monoTest[0]);
+          var phylum = getLCASpecies(d,speciesTreeRoot);
+          if (!phylum) {
+            phylum = "Undefined"
+          }
+          if   (d.data.clade) {
+            // d.data.name = "["+monoTest[1]+" seq "+monoTest[2]+" spe] ";
+            // d.data.lastEvent = {eventType : "collapsed", speciesLocation :phylum};
+            // Un peu bizzare de donner monophyletic comme eventype
+            // On est oblige de faire ca car on ecrase les noeuds avant de faire le updatelyaout qui va justement
+            // ajourter les   d.data.lastEvent
+            if (! d.data.lastEvent) { // je  ne veux pas ecraser l'info si elle existe deja
+              d.data.lastEvent = {eventType : "monophyletic",speciesLocation :phylum};
+            }
+            // d.data.lastEvent.speciesLocation = phylum;
+            d.data.nodeinfo = {status : "collapsed"};
+            d.data._clade = d.data.clade;
+            d.data.clade = null;
+          }
+        }
+      }
+    }
+  });
+}
+
+// Fonction qui collaopse les noeuds monophyletiques situes entre une certaine
+// hauteur de la racine et une  certaine hauteur des noeuds deja collapses
+// pour les gros arbres
+// ------------------------------------------------------------------------
+function collapseMonophyleticBigTree(treeRoot,patterns) {
+  var acolapser = [];
+  var aouvrir = [];
+  var prevnode = null;
+  if (patterns.length > 0 ) {
+    // Boucle sur les patterns
+    patterns.forEach(function(p){
+      // Selection des feuilles
+      p.forEach(function (d,i ){
+        var nomPattern= d.replace(/[\n\r]/g, '');
+        var focusNode = null;
+        // Recupere la feuille focus
+        treeRoot.each(function (d,i ){
+          if (d.data.name){
+            var nomFeuille = d.data.name;
+            if (nomFeuille === nomPattern) {
+              focusNode = d;
+            }
+          }
+          // cas des crossref
+          if (d.data.eventsRec) {
+            if (d.data.eventsRec[0].crossref) {
+              // Si la balise crossref est presente on
+              // l'utilise plutot que le nom du gene
+              var cross=d.data.eventsRec[0].crossref;
+              for(var exKey in cross) {
+                var nomFeuille = cross[exKey];
+                if (nomFeuille === nomPattern){
+                  console.log("FIND PATTERN "+nomFeuille);
+                  focusNode = d;
+                }
+              }
+            }
+          }
+        });
+        if (focusNode) {
+          //Ouvre les freres de la feuille
+          parent = focusNode.parent;
+          parent.each(function (d) {
+            // aouvrir.push(d)
+          });
+          //ouvre les noeuds entre la feuille et la racine
+          while (parent != null) {
+            aouvrir.push(parent)
+            parent = parent.parent;
+          }
+        }
+        else {
+          console.log("PATTERN NOT FOUND: "+ nomPattern);
+        }
+      });
+    });
+  }
+  else {
+    console.log("NO PATTERN SEARCH");
+  }
+  treeRoot.eachBefore(function (d) {
+    var parent = d.parent;
+    var gparent = parent;
+    if (gparent !== null) {
+      gparent = parent.parent;
+    }
+    var agparent = gparent;
+    if (agparent !== null) {
+      agparent = gparent.parent;
+    }
+    var aagparent = agparent;
+    if (aagparent !== null) {
+      aagparent = agparent.parent;
+    }
+    var aaagparent = aagparent;
+    if (aaagparent !== null) {
+      aaagparent = aagparent.parent;
+    }
+    if (!(( aouvrir.includes(d)) ||( acolapser.includes(parent)) ||  (acolapser.includes(gparent))||  (acolapser.includes(agparent))||  (acolapser.includes(aagparent)) )){
+      // if (d.depth % 3 == 0 ){
+      // var monoTest = monophyletic(d);
+      var monoTest =[1,1];
+      // if (d.depth < 5 ) {
+      //   monoTest = monophyletic(d);
+      // }
+      // if (monoTest[0] != 0) {
+      acolapser.push(d);
+      if (d.depth > 0) {
+        var phylum;
+        if (d.depth < 10 ) {
+          monoTest = monophyletic(d);
+          phylum = setLeafColour("phylum_"+monoTest[0]);
+        }
+        if (!phylum) {
+          phylum = "Undetermined taxon"
+        }
+        if   (d.data.clade) {
+          // d.data.name = "["+monoTest[1]+" seq "+monoTest[2]+" spe] ";
+          // d.data.lastEvent = {eventType : "collapsed", speciesLocation :phylum};
+          // Un peu bizzare de donner monophyletic comme eventype
+          // On est oblige de faire ca car on ecrase les noeuds avant de faire le updatelyaout qui va justement
+          // ajourter les   d.data.lastEvent
+          if (phylum  != "Undetermined taxon") {
+            if (! d.data.lastEvent) { // je  ne veux pas ecraser l'info si elle existe deja
+            d.data.lastEvent = {eventType : "monophyletic",speciesLocation :phylum};
+            }
+          }
+          else {
+            if (! d.data.lastEvent) { // je  ne veux pas ecraser l'info si elle existe deja
+              d.data.lastEvent = {eventType : "speciation",speciesLocation :phylum};
+            }
+          }
+          d.data.lastEvent.speciesLocation = phylum;
+          d.data.nodeinfo = {status : "collapsed"};
+          d.data._clade = d.data.clade;
+          d.data.clade = null;
+        }
+      }
+    }
+  });
+}
+
+// Fonction ajoute nb sequences et especes
+// ---------------------------------------
+function  addNumberSeqSpec(treeRoot) {
+  treeRoot.eachAfter(function (d) {
+    var specs = [];
+    if (!d.children) {
+      d.data.nbseqspe =  {nbSeq : 1,nbSpe : 1};
+    }
+    else {
+      var nbseq = 0;
+      var nbspe = 0;
+      var fils = d.children;
+      fils.forEach(function (d){
+        nbseq = nbseq + d.data.nbseqspe.nbSeq;
+        // nbspe = nbspe + d.data.nbseqspe.nbSpe;
+        var spec = getSpec(d);
+        specs = specs.concat(spec);
+      })
+      var tmp = specs;
+      uspecs=removeDuplicates(tmp);
+      nbspe=uspecs.length;
+      d.data.nbseqspe =  {nbSeq :nbseq,nbSpe :nbspe};
+    }
+  });
+}
+
+// Fonction recupere especes
+// -------------------------
+function getSpec (noeud) {
+  if (!noeud.children) {
+    var specs = [];
+    var eventsRec = noeud.data.eventsRec;
+    if (eventsRec) {
+      var lastEvent = eventsRec[eventsRec.length - 1];
+      specs.push(lastEvent.speciesLocation)
+    }
+    else {
+      console.log(" ERROR : NO EVENTS FOR ");
+      console.log(noeud.data);
+    }
+    return specs;
+  }
+  else {
+    var specs = [];
+    var fils = noeud.children;
+      fils.forEach(function (d, i ){
+        var spec = getSpec(d);
+        var tmp = specs.concat(spec);
+        specs = tmp;
+      });
+    return specs;
+  }
+}
+
+// Fonction qui collapse les noeuds d'une certaine profondeur
+// ----------------------------------------------------------
+function expandTree(treeRoot) {
+  treeRoot.each(function (d) {
+    if (d.data.nodeinfo) {
+      if (d.data.nodeinfo.status === "collapsed") {
+        if (d.data._clade) {
+          d.data.clade = d.data._clade;
+          d.data._clade = null;
+          d.data.nodeinfo = {status : "extended"};
+        }
+      }
+    }
+  });
+}
+
+// Fonction qui collapse les noeuds d'une certaine profondeur
+// ----------------------------------------------------------
+function collapseVeryBigTree(treeRoot,patterns) {
+  var acolapser = [];
+  var aouvrir = [];
+  if (patterns.length > 0)  {
+    //Ecrase tous les noeuds
+    treeRoot.each(function (d) {
+      if ((d.depth == 5) || (d.depth == 10) ||(d.depth == 20)|| (d.depth == 30)|| (d.depth == 40) ) {
+      acolapser.push(d)
+      }
+    });
+    // Boucle sur les patterns
+    patterns.forEach(function(p) {
+      // Selection des feuilles de la pattern
+      p.forEach(function(d,i) {
+        var nomPattern= d.replace(/[\n\r]/g, '');
+        var focusNode = null;
+        // Recupere la feuille focus
+        treeRoot.each(function (d,i ){
+          if (d.data.name){
+            var nomFeuille = d.data.name;
+            if (nomFeuille === nomPattern) {
+              focusNode = d;
+            }
+          }
+          // cas des crossref
+          if (d.data.eventsRec) {
+            if (d.data.eventsRec[0].crossref) {
+              // Si la balise crossref est presente on
+              // l'utilise plutot que le nom du gene
+              var cross=d.data.eventsRec[0].crossref;
+              for(var exKey in cross) {
+                var nomFeuille = cross[exKey];
+                if (nomFeuille === nomPattern){
+                  console.log("FIND PATTERN "+nomFeuille);
+                  focusNode = d;
+                }
+              }
+            }
+          }
+        });
+        if (focusNode) {
+          var parent = focusNode.parent;
+          //Ouvre les freres de la feuille
+          parent.each(function (d) {
+            // aouvrir.push(d)
+          });
+          //ouvre les noeuds entre la feuille et la racine
+          while (parent != null) {
+            aouvrir.push(parent)
+            parent = parent.parent;
+          }
+        }
+        else {
+          console.log("PATTERN NOT FOUND : "+nomPattern);
+        }
+      });
+    });
+  }
+  else {
+    console.log("NO PATTERN")
+    treeRoot.each(function (d) {
+      if ((d.depth == 5) || (d.depth == 10) ||(d.depth == 30)|| (d.depth == 60)|| (d.depth == 90) ) {
+        acolapser.push(d)
+      }
+    });
+  }
+  acolapser.forEach(function (d) {
+    if   (d.data.clade) {
+      d.data._clade = d.data.clade;
+      d.data.clade = null;
+      d.data.nodeinfo = {status : "collapsed"};
+    }
+  });
+  aouvrir.forEach(function (d) {
+    if   (d.data._clade) {
+      d.data.clade = d.data._clade;
+      d.data._clade = null;
+      d.data.nodeinfo = {status : "extended"};
+    }
+  });
+}
+
+  // Fonction  suppression d'un element unique dans un tableau
+  // ----------------------------------------------------------
+  function removeSingle(target_array) {
+    target_array.sort();
+    var i = 0;
+    while(i < target_array.length) {
+      if(target_array[i] !== target_array[i+1]) {
+        target_array.splice(i,1);
+      }
+      else {
+        i += 1;
+      }
+    }
+    return target_array;
+  }
+
+  // Fonction  suppression des  elements multiples dans un tableau
+  // --------------------------------------------------------------
+  function removeDuplicates(target_array) {
+    target_array.sort();
+    var i = 0;
+    while(i < target_array.length) {
+      if(target_array[i] === target_array[i+1]) {
+        target_array.splice(i+1,1);
+      }
+      else {
+        i += 1;
+      }
+    }
+    return target_array;
+  }
+
+  // Fonction  suppression des  elements multiples dans un tableau et classe par occurence
+  // -------------------------------------------------------------------------------------
+  function removesortDuplicates(target_array) {
+    target_array.sort();
+    var sorted_array = [];
+    var i = 0;
+    var j = 0;
+    var vscore  = {score: 0, fam: "none"};
+    var scored_array = [];
+    var score = [];
+    score[j] = 0;
+    sorted_array[i] = target_array[i];
+    i=1;
+    while(i < target_array.length) {
+      if(target_array[i] !==  sorted_array[j]) {
+        j = j + 1;
+        sorted_array[j] = target_array[i];
+        score[j] = 0;
+      } else {
+         score[j] = score[j] + 1;
+      }
+       i = i + 1;
+    }
+    i = 0;
+    while(i <= j){
+      vscore  = {score: score[i], fam: sorted_array[i]};
+      scored_array.push(vscore);
+      i = i + 1
+    }
+    console.log(scored_array);
+    scored_array.sort(function(a,b){
+          scA=a.score;
+          scB=b.score;
+          console.log("CLASSEMENT ["+scA+"] ["+scB+"]=");
+          return scB - scA;
+        });
+    i = 0;
+    while(i <= j){
+      sorted_array[i] = scored_array[i].fam;
+      i = i + 1
+    }
+    return sorted_array;
+  }
+
 
   // ACtions sur les boutons
   // -----------------------
