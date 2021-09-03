@@ -9,7 +9,7 @@ Serveur web dédié à l'affichage de la sélection positive dans un arbre phylo
 
 `cp data/trees.demo.CLU_000022_0_9.xml input_tree.xml`
 
-# Importer les packages nodes nécéssaires au serveur node
+# Importer les packages nodes nécessaires au serveur node
 `npm install`
 
 # Lancer le serveur
