@@ -1,5 +1,5 @@
 # Sélection positive
-Serveur web dédié à l'affichage de la sélection positive dans un arbre phylogénétique et un alignement.
+Stage : création d'un serveur web dédié à l'affichage de la sélection positive dans un arbre phylogénétique et un alignement.
 
 # Cloner le dépôt (ou télécharger le zip)
 `git clone https://github.com/simonpenel/positive-selection.git`
