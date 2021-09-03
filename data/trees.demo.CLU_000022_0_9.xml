@@ -1,0 +1,151 @@
+<?xml version="1.0" ?>
+<phyloxml>
+	<phylogeny rooted="false">
+		<clade>
+			<clade>
+				<name>PHOLL_1.PE1114</name>
+				<branch_length>1.3321</branch_length>
+				<eventsRec>
+					<leaf speciesLocation="PHOTORHABDUS LUMINESCENS SUBSP. LAUMONDII TTO1	" syntenyLeft="+CLU_045115_0_0:PHOLL_1.PE1113 +CLU_000022_0_8:PHOLL_1.PE1112 +CLU_1365142_0_0:PHOLL_1.PE1111 +CLU_013584_2_0:PHOLL_1.PE1110 +CLU_2827417_0_0:PHOLL_1.PE1109" syntenyRight="-CLU_073308_1_0:PHOLL_1.PE1115 +CLU_2452027_0_0:PHOLL_1.PE1116 -CLU_023034_5_5:PHOLL_1.PE1117 -CLU_1049095_0_0:PHOLL_1.PE1118 -CLU_158566_0_0:PHOLL_1.PE1119"/>
+				</eventsRec>
+			</clade>
+			<clade>
+				<branch_length>0.159201</branch_length>
+				<confidence type="unknown">56</confidence>
+				<clade>
+					<branch_length>0.085862</branch_length>
+					<confidence type="unknown">51</confidence>
+					<clade>
+						<branch_length>0.236591</branch_length>
+						<confidence type="unknown">86</confidence>
+						<clade>
+							<name>SINAD_1.PE6649</name>
+							<branch_length>0.886714</branch_length>
+							<eventsRec>
+								<leaf speciesLocation="SINGULISPHAERA ACIDIPHILA DSM 18658	" syntenyLeft="+CLU_000022_21_2:SINAD_1.PE6648 +CLU_181321_0_2:SINAD_1.PE6647 -CLU_081241_1_0:SINAD_1.PE6646 +CLU_534089_0_0:SINAD_1.PE6645 +CLU_260415_0_0:SINAD_1.PE6644" syntenyRight="+CLU_045115_0_0:SINAD_1.PE6650 +CLU_023671_2_1:SINAD_1.PE6651 +CLU_018816_14_1:SINAD_1.PE6652 +CLU_000604_78_2:SINAD_1.PE6653 -CLU_000022_69_2:SINAD_1.PE6654"/>
+							</eventsRec>
+						</clade>
+						<clade>
+							<name>MYXXD_1.PE1262</name>
+							<branch_length>1.675431</branch_length>
+							<eventsRec>
+								<leaf speciesLocation="MYXOCOCCUS XANTHUS DK 1622	" syntenyLeft="+CLU_070306_0_0:MYXXD_1.PE1263 +CLU_009629_3_0:MYXXD_1.PE1264 -CLU_010194_9_1:MYXXD_1.PE1265 +CLU_032263_2_2:MYXXD_1.PE1266 -CLU_009583_18_2:MYXXD_1.PE1267" syntenyRight="+CLU_044821_0_0:MYXXD_1.PE1261 +CLU_722947_0_0:MYXXD_1.PE1260 -CLU_014411_2_1:MYXXD_1.PE1259 -CLU_043531_0_0:MYXXD_1.PE1258 -CLU_000604_84_4:MYXXD_1.PE1257"/>
+							</eventsRec>
+						</clade>
+					</clade>
+					<clade>
+						<branch_length>0.185857</branch_length>
+						<confidence type="unknown">56</confidence>
+						<clade>
+							<branch_length>0.25276</branch_length>
+							<confidence type="unknown">99</confidence>
+							<clade>
+								<branch_length>0.339385</branch_length>
+								<confidence type="unknown">100</confidence>
+								<clade>
+									<branch_length>0.467913</branch_length>
+									<confidence type="unknown">100</confidence>
+									<clade>
+										<name>DELAS_1.PE4738</name>
+										<branch_length>0.465041</branch_length>
+										<eventsRec>
+											<leaf speciesLocation="DELFTIA ACIDOVORANS SPH-1	" syntenyLeft="+CLU_044153_0_0:DELAS_1.PE4739 +CLU_057011_2_0:DELAS_1.PE4740 +CLU_070456_1_1:DELAS_1.PE4741 +CLU_2034247_0_0:DELAS_1.PE4742 +CLU_047691_12_5:DELAS_1.PE4743" syntenyRight="+CLU_000022_35_4:DELAS_1.PE4737 +CLU_000022_11_1:DELAS_1.PE4736 +CLU_000022_0_10:DELAS_1.PE4735 +CLU_008287_9_0:DELAS_1.PE4734 -CLU_050192_0_2:DELAS_1.PE4733"/>
+										</eventsRec>
+									</clade>
+									<clade>
+										<name>VARPE_1.PE4273</name>
+										<branch_length>0.434228</branch_length>
+										<eventsRec>
+											<leaf speciesLocation="VARIOVORAX PARADOXUS EPS	" syntenyLeft="+CLU_070456_1_1:VARPE_1.PE4274 +CLU_181321_0_0:VARPE_1.PE4275 +CLU_194250_0_0:VARPE_1.PE4276 +CLU_047691_12_3:VARPE_1.PE4277 -CLU_057011_4_0:VARPE_1.PE4278" syntenyRight="+CLU_000022_35_2:VARPE_1.PE4272 +CLU_000022_0_15:VARPE_1.PE4271 +CLU_000022_0_0:VARPE_1.PE4270 -CLU_008287_9_0:VARPE_1.PE4269 -CLU_1003535_0_0:VARPE_1.PE4268"/>
+										</eventsRec>
+									</clade>
+								</clade>
+								<clade>
+									<branch_length>0.144264</branch_length>
+									<confidence type="unknown">100</confidence>
+									<clade>
+										<branch_length>0.113017</branch_length>
+										<confidence type="unknown">42</confidence>
+										<clade>
+											<branch_length>0.773265</branch_length>
+											<confidence type="unknown">100</confidence>
+											<clade>
+												<name>ACTM4_1.PE4965</name>
+												<branch_length>0.42857</branch_length>
+												<eventsRec>
+													<leaf speciesLocation="ACTINOPLANES MISSOURIENSIS 431	" syntenyLeft="+CLU_025190_0_0:ACTM4_1.PE4966 +CLU_019249_1_0:ACTM4_1.PE4967 +CLU_025784_0_0:ACTM4_1.PE4968 +CLU_181321_0_1:ACTM4_1.PE4969 +CLU_042088_3_0:ACTM4_1.PE4970" syntenyRight="+CLU_000022_0_15:ACTM4_1.PE4964 +CLU_070456_1_1:ACTM4_1.PE4963 +CLU_147287_1_0:ACTM4_1.PE4962 +CLU_031922_0_2:ACTM4_1.PE4961 -CLU_170430_0_0:ACTM4_1.PE4960"/>
+												</eventsRec>
+											</clade>
+											<clade>
+												<name>STRGG_1.PE2595</name>
+												<branch_length>0.367106</branch_length>
+												<eventsRec>
+													<leaf speciesLocation="STREPTOMYCES GRISEUS SUBSP. GRISEUS NBRC 13350	" syntenyLeft="+CLU_025190_0_0:STRGG_1.PE2596 +CLU_019249_1_0:STRGG_1.PE2597 +CLU_068979_5_5:STRGG_1.PE2598 +CLU_097175_0_0:STRGG_1.PE2599 -CLU_187747_0_0:STRGG_1.PE2600" syntenyRight="+CLU_005126_7_0:STRGG_1.PE2594 +CLU_022477_2_1:STRGG_1.PE2593 +CLU_021018_1_0:STRGG_1.PE2592 +CLU_042088_3_0:STRGG_1.PE2591 +CLU_181321_0_1:STRGG_1.PE2590"/>
+												</eventsRec>
+											</clade>
+										</clade>
+										<clade>
+											<name>AMYMS_1.PE6146</name>
+											<branch_length>1.086743</branch_length>
+											<eventsRec>
+												<leaf speciesLocation="AMYCOLATOPSIS MEDITERRANEI S699	" syntenyLeft="+CLU_033716_0_0:AMYMS_1.PE6147 +CLU_078243_0_0:AMYMS_1.PE6148 -CLU_047415_0_0:AMYMS_1.PE6149 +CLU_000022_2_13:AMYMS_1.PE6150 +CLU_000022_2_4:AMYMS_1.PE6151" syntenyRight="+CLU_181321_0_2:AMYMS_1.PE6145 +CLU_588807_0_0:AMYMS_1.PE6144 -CLU_000022_2_10:AMYMS_1.PE6143 -CLU_034180_13_0:AMYMS_1.PE6142 -CLU_000022_2_12:AMYMS_1.PE6141"/>
+											</eventsRec>
+										</clade>
+									</clade>
+									<clade>
+										<branch_length>0.191983</branch_length>
+										<confidence type="unknown">60</confidence>
+										<clade>
+											<name>MYXXD_1.PE4414</name>
+											<branch_length>0.687904</branch_length>
+											<eventsRec>
+												<leaf speciesLocation="MYXOCOCCUS XANTHUS DK 1622	" syntenyLeft="-CLU_034180_16_0:MYXXD_1.PE4415 -CLU_045506_0_0:MYXXD_1.PE4416 -CLU_120501_0_0:MYXXD_1.PE4417 +CLU_2012808_0_0:MYXXD_1.PE4418 -CLU_1150348_0_0:MYXXD_1.PE4419" syntenyRight="-CLU_053011_1_0:MYXXD_1.PE4413 +CLU_000022_35_2:MYXXD_1.PE4412 +CLU_000022_35_2:MYXXD_1.PE4411 +CLU_000022_35_2:MYXXD_1.PE4410 +CLU_223414_0_0:MYXXD_1.PE4409"/>
+											</eventsRec>
+										</clade>
+										<clade>
+											<name>MYXXD_1.PE3896</name>
+											<branch_length>0.978193</branch_length>
+											<eventsRec>
+												<leaf speciesLocation="MYXOCOCCUS XANTHUS DK 1622	" syntenyLeft="-CLU_023205_2_0:MYXXD_1.PE3897 +CLU_046101_1_0:MYXXD_1.PE3898 +CLU_071992_0_0:MYXXD_1.PE3899 +CLU_609313_0_0:MYXXD_1.PE3900 -CLU_043391_0_0:MYXXD_1.PE3901" syntenyRight="+CLU_000022_21_2:MYXXD_1.PE3895 +CLU_000022_0_15:MYXXD_1.PE3894 -CLU_969187_0_0:MYXXD_1.PE3893 +CLU_653505_0_0:MYXXD_1.PE3892 -CLU_609469_0_0:MYXXD_1.PE3891"/>
+											</eventsRec>
+										</clade>
+									</clade>
+								</clade>
+							</clade>
+							<clade>
+								<name>BRAJA1_1.PE7550</name>
+								<branch_length>1.654585</branch_length>
+								<eventsRec>
+									<leaf speciesLocation="BRADYRHIZOBIUM JAPONICUM USDA 6	" syntenyLeft="-CLU_004435_3_1:BRAJA1_1.PE7549 -CLU_066224_0_0:BRAJA1_1.PE7548 -CLU_084449_0_0:BRAJA1_1.PE7547 +CLU_020161_7_0:BRAJA1_1.PE7546 -CLU_022017_7_3:BRAJA1_1.PE7545" syntenyRight="+CLU_194334_0_0:BRAJA1_1.PE7551 +CLU_057011_4_0:BRAJA1_1.PE7552 +CLU_027853_1_0:BRAJA1_1.PE7553 -CLU_000604_1_22:BRAJA1_1.PE7554 -CLU_046113_8_1:BRAJA1_1.PE7555"/>
+								</eventsRec>
+							</clade>
+						</clade>
+						<clade>
+							<name>FLAJ1_1.PE2085</name>
+							<branch_length>2.129012</branch_length>
+							<eventsRec>
+								<leaf speciesLocation="FLAVOBACTERIUM JOHNSONIAE UW101	" syntenyLeft="+CLU_004743_0_0:FLAJ1_1.PE2084 +CLU_010194_2_10:FLAJ1_1.PE2083 +CLU_000022_2_2:FLAJ1_1.PE2082 +CLU_000022_11_0:FLAJ1_1.PE2081 +CLU_000022_11_0:FLAJ1_1.PE2080" syntenyRight="+CLU_016922_4_0:FLAJ1_1.PE2086 +CLU_000022_0_0:FLAJ1_1.PE2087 +CLU_516704_0_0:FLAJ1_1.PE2088 +CLU_000022_2_2:FLAJ1_1.PE2089 +CLU_017617_1_0:FLAJ1_1.PE2090"/>
+							</eventsRec>
+						</clade>
+					</clade>
+				</clade>
+				<clade>
+					<name>STANL_1.PE184</name>
+					<branch_length>1.236373</branch_length>
+					<eventsRec>
+						<leaf speciesLocation="STACKEBRANDTIA NASSAUENSIS DSM 44728	" syntenyLeft="+CLU_034180_13_2:STANL_1.PE185 +CLU_070456_1_1:STANL_1.PE186 +CLU_000022_2_4:STANL_1.PE187 +CLU_000022_0_12:STANL_1.PE188 +CLU_000022_16_6:STANL_1.PE189" syntenyRight="-CLU_083287_5_2:STANL_1.PE183 +CLU_020336_50_1:STANL_1.PE182 +CLU_073550_0_0:STANL_1.PE181 +CLU_122410_0_0:STANL_1.PE180 +CLU_2103760_0_0:STANL_1.PE179"/>
+					</eventsRec>
+				</clade>
+			</clade>
+			<clade>
+				<name>GRAMM_1.PE3206</name>
+				<branch_length>0.700363</branch_length>
+				<eventsRec>
+					<leaf speciesLocation="GRANULICELLA MALLENSIS MP5ACTX8	" syntenyLeft="+CLU_000022_2_6:GRAMM_1.PE3207 +CLU_020844_6_1:GRAMM_1.PE3208 +CLU_006493_7_0:GRAMM_1.PE3209 +CLU_014340_1_2:GRAMM_1.PE3210 +CLU_000022_21_0:GRAMM_1.PE3211" syntenyRight="+CLU_000022_0_13:GRAMM_1.PE3205 -CLU_1737985_0_0:GRAMM_1.PE3204 -CLU_1426161_0_0:GRAMM_1.PE3203 -CLU_001218_1_7:GRAMM_1.PE3202 -CLU_126902_2_0:GRAMM_1.PE3201"/>
+				</eventsRec>
+			</clade>
+		</clade>
+		<name>CLU_000022_0_9</name>
+		<size leaves="14" species="12"/>
+	</phylogeny>
+</phyloxml>
